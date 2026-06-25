@@ -1,0 +1,27 @@
+{
+  "timestamp": "2026-06-25T17:16:33.887312",
+  "summary": {
+    "total_samples": 99,
+    "total_genes_canonical": 6,
+    "total_genes_sasp": 7,
+    "total_genes_cart_targets": 12
+  },
+  "cohorts": {
+    "GSE318067_Primary_Bulk": {
+      "samples": 68,
+      "SLE_patients": 34,
+      "HC_controls": 34,
+      "proteomics_soma": 1129,
+      "proteomics_rbm": 282
+    },
+    "scRNA_seq_Discovery": {
+      "samples": 6,
+      "GSE162577": 3,
+      "GSE142016": 3
+    },
+    "GSE36700_Tissue": {
+      "samples": 25,
+      "SLE": 4
+    }
+  }
+}
