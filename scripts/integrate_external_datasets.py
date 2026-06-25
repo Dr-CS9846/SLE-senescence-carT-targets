@@ -29,9 +29,13 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Configuration
+import platform
+BASE_PATH = os.path.abspath('datasets')
+OUTPUT_PATH = os.path.abspath('data/external_validation')
+
 CONFIG = {
-    'base_path': 'datasets/',
-    'output_path': 'data/external_validation/',
+    'base_path': BASE_PATH,
+    'output_path': OUTPUT_PATH,
     'senescence_genes': {
         'canonical': ['CDKN2A', 'CDKN1A', 'CDKN2B', 'TP53', 'RB1', 'E2F1'],
         'sasp': ['IL6', 'TNF', 'CXCL8', 'MMP3', 'MMP9', 'SERPINE1', 'IGFBP7'],
@@ -352,14 +356,16 @@ class BulkDataset:
                 'Sample_ID': self.metadata['Sample_ID'],
                 'Senescence_Score': self.senescence_scores
             })
-            scores_df.to_csv(f"{output_dir}/{self.name}_senescence_scores.csv", index=False)
-            logger.info(f"Saved senescence scores to {output_dir}/{self.name}_senescence_scores.csv")
+            scores_path = os.path.join(output_dir, f"{self.name}_senescence_scores.csv")
+            scores_df.to_csv(scores_path, index=False)
+            logger.info(f"Saved senescence scores to {scores_path}")
 
         # Save target expression
         targets_expr = extract_target_expression(self.data, CONFIG['car_t_targets'])
         if targets_expr is not None:
-            targets_expr.to_csv(f"{output_dir}/{self.name}_target_expression.csv")
-            logger.info(f"Saved target expression to {output_dir}/{self.name}_target_expression.csv")
+            targets_path = os.path.join(output_dir, f"{self.name}_target_expression.csv")
+            targets_expr.to_csv(targets_path)
+            logger.info(f"Saved target expression to {targets_path}")
 
 
 class scRNADataset:
@@ -413,7 +419,8 @@ class scRNADataset:
 
         # Save metadata with senescence scores
         metadata_df = pd.DataFrame(self.adata.obs)
-        metadata_df.to_csv(f"{output_dir}/{self.name}_metadata_with_senescence.csv")
+        metadata_path = os.path.join(output_dir, f"{self.name}_metadata_with_senescence.csv")
+        metadata_df.to_csv(metadata_path)
         logger.info(f"Saved metadata to {output_dir}/{self.name}_metadata_with_senescence.csv")
 
 
@@ -435,11 +442,12 @@ def process_category_1_bulk():
         'GSE122459': 'GSE122459_series_matrix.txt.gz',
     }
 
-    output_dir = f"{CONFIG['output_path']}1_Bulk_Expansion"
+    output_dir = os.path.join(CONFIG['output_path'], '1_Bulk_Expansion')
     results = {}
 
     for name, filename in datasets.items():
         filepath = os.path.join(CONFIG['base_path'], name, filename)
+        logger.info(f"Looking for: {filepath}")
 
         if not os.path.exists(filepath):
             logger.warning(f"File not found: {filepath}")
@@ -474,7 +482,7 @@ def process_category_2_scrna():
         'GSE266852': f"{CONFIG['base_path']}GSE266852/GSE266852.h5ad",
     }
 
-    output_dir = f"{CONFIG['output_path']}2_scRNA_Expansion"
+    output_dir = os.path.join(CONFIG['output_path'], '2_scRNA_Expansion')
     results = {}
 
     for name, filepath in datasets.items():
@@ -508,7 +516,7 @@ def process_category_3_tissue():
         'GSE174188': 'GSE174188_series_matrix.txt.gz',
     }
 
-    output_dir = f"{CONFIG['output_path']}3_Tissue_Expansion"
+    output_dir = os.path.join(CONFIG['output_path'], '3_Tissue_Expansion')
     results = {}
 
     # Process bulk tissue
@@ -562,7 +570,7 @@ def process_category_4_senescence():
         'GSE297723': 'GSE297723_series_matrix.txt.gz',
     }
 
-    output_dir = f"{CONFIG['output_path']}4_Senescence_Validation"
+    output_dir = os.path.join(CONFIG['output_path'], '4_Senescence_Validation')
     results = {}
 
     # Bulk senescence datasets
@@ -616,7 +624,8 @@ def main():
     }
 
     # Save results summary
-    with open(f"{CONFIG['output_path']}/PIPELINE_RESULTS.json", 'w') as f:
+    results_path = os.path.join(CONFIG['output_path'], 'PIPELINE_RESULTS.json')
+    with open(results_path, 'w') as f:
         json.dump(results, f, indent=2)
 
     logger.info("="*60)
